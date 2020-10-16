@@ -26,7 +26,7 @@
   "author": "DragFAQ",
   "license": "ISC",
   "dependencies": {
-    "joi": "^14.3.1",
+    "joi": "^17.2.1",
     "joi-to-swagger": "^3.2.0",
     "koa": "^2.7.0",
     "koa-router": "^7.4.0",
