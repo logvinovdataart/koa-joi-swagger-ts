@@ -3,12 +3,13 @@ import * as joi from "joi";
 import { registerMethod, registerMiddleware } from "./utils";
 import {HTTPStatusCodes, IPath, Tags} from "./index";
 import { BaseContext } from "koa";
+import {Schema} from "joi";
 
 const PARAMETERS: Map<Function, Map<string, Map<string, IParameter>>> = new Map();
 
 export interface IParameter {
   in: ENUM_PARAM_IN;
-  schema: joi.Schema | ISchema;
+  schema: Schema;
 }
 
 export enum ENUM_PARAM_IN {
@@ -75,12 +76,12 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
       formData = body;
       body = {};
     }
-    const {error, value} = joi.validate({
+    const {error, value} = joi.object(tempSchema).validate({
       body,
       formData,
       params: ctx.params,
       query: ctx.request.query
-    }, tempSchema);
+    });
     if (error) {
       return ctx.throw(HTTPStatusCodes.badRequest, JSON.stringify({
         code: HTTPStatusCodes.badRequest,
