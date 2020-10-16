@@ -75,7 +75,7 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
       formData = body;
       body = {};
     }
-    const {error, value} = joi.object(tempSchema).validate({
+    const {error, value} = joi.build(tempSchema).validate({
       body,
       formData,
       params: ctx.params,
