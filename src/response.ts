@@ -3,9 +3,8 @@ import * as joi from "joi";
 import { registerMethod, registerMiddleware } from "./utils";
 import {HTTPStatusCodes, IPath, Tags} from "./index";
 import { BaseContext } from "koa";
-import {Schema} from "joi";
 
-const RESPONSES: Map<Function, Map<string, Map<number, Schema>>> = new Map();
+const RESPONSES: Map<Function, Map<string, Map<number, ISchema | joi.Schema>>> = new Map();
 
 export const DEFAULT_RESPONSE: joi.Schema = joi.string().default("");
 
@@ -35,7 +34,11 @@ export const response = (code: number, schema?: ISchema | joi.Schema): MethodDec
   registerMiddleware(target, key, async (ctx: BaseContext, next: Function): Promise<void> => {
     await next();
     if (RESPONSES.get(target.constructor).get(key).has(ctx.status)) {
-      const {error, value} = RESPONSES.get(target.constructor).get(key).get(ctx.status).validate(ctx.body);
+      const registerJoiSchema = RESPONSES.get(target.constructor).get(key).get(ctx.status)["isJoi"]
+          ? RESPONSES.get(target.constructor).get(key).get(ctx.status)
+          // @ts-ignore
+          : toJoi(RESPONSES.get(target.constructor).get(key).get(ctx.status));
+      const {error, value} = registerJoiSchema.validate(ctx.body);
       if (error) {
         ctx.body = {code: HTTPStatusCodes.internalServerError, message: error.message};
         ctx.status = HTTPStatusCodes.internalServerError;
@@ -45,6 +48,8 @@ export const response = (code: number, schema?: ISchema | joi.Schema): MethodDec
     }
   });
 
-  RESPONSES.get(target.constructor).get(key).set(code, toJoi(schema));
+  // @ts-ignore
+  const joiSchema = schema["isJoi"] ? schema : toJoi(schema);
+  RESPONSES.get(target.constructor).get(key).set(code, toJoi(joiSchema));
   target[Tags.tagResponse] = target.constructor[Tags.tagResponse] = RESPONSES.get(target.constructor);
 };

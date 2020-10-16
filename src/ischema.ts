@@ -1,7 +1,7 @@
 import * as joi from "joi";
 
 import j2s from "joi-to-swagger";
-import { ObjectSchema } from "joi";
+import {AnySchema, ObjectSchema, Schema} from "joi";
 import {Tags} from "./index";
 
 export interface ISchema {
@@ -40,10 +40,7 @@ export const toSchema = (Definition) => {
   return j2s(joi.object().keys(key)).swagger;
 };
 
-export const toJoi = (iSchema: ISchema | joi.Schema): joi.Schema | ISchema => {
-  if (iSchema["isJoi"]) {
-    return iSchema;
-  }
+export const toJoi = (iSchema: ISchema): Schema => {
   const type = iSchema["type"] || "object";
   let schema = null;
   const Ref: any = iSchema["$ref"] || (iSchema["items"] && iSchema["items"].$ref);
