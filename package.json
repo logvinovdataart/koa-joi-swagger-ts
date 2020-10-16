@@ -27,7 +27,7 @@
   "license": "ISC",
   "dependencies": {
     "joi": "^17.2.1",
-    "joi-to-swagger": "^3.2.0",
+    "joi-to-swagger": "^5.0.1",
     "koa": "^2.7.0",
     "koa-router": "^7.4.0",
     "koa2-swagger-ui": "^2.14.1",
