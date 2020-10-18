@@ -95,8 +95,6 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
     return await next();
   });
 
-  // @ts-ignore
-  const joiSchema = schema["isJoi"] ? schema : toJoi(schema);
-  PARAMETERS.get(target.constructor).get(key).set(name, {in: paramIn, schema: joiSchema});
+  PARAMETERS.get(target.constructor).get(key).set(name, {in: paramIn, schema: toJoi(schema)});
   target[Tags.tagParameter] = target.constructor[Tags.tagParameter] = PARAMETERS.get(target.constructor);
 };

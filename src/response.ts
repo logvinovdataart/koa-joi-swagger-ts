@@ -34,10 +34,7 @@ export const response = (code: number, schema?: ISchema | joi.Schema): MethodDec
   registerMiddleware(target, key, async (ctx: BaseContext, next: Function): Promise<void> => {
     await next();
     if (RESPONSES.get(target.constructor).get(key).has(ctx.status)) {
-      const registerJoiSchema = RESPONSES.get(target.constructor).get(key).get(ctx.status)["isJoi"]
-          ? RESPONSES.get(target.constructor).get(key).get(ctx.status)
-          // @ts-ignore
-          : toJoi(RESPONSES.get(target.constructor).get(key).get(ctx.status));
+      const registerJoiSchema = toJoi(RESPONSES.get(target.constructor).get(key).get(ctx.status));
       const {error, value} = registerJoiSchema.validate(ctx.body);
       if (error) {
         ctx.body = {code: HTTPStatusCodes.internalServerError, message: error.message};
@@ -48,8 +45,6 @@ export const response = (code: number, schema?: ISchema | joi.Schema): MethodDec
     }
   });
 
-  // @ts-ignore
-  const joiSchema = schema["isJoi"] ? schema : toJoi(schema);
-  RESPONSES.get(target.constructor).get(key).set(code, toJoi(joiSchema));
+  RESPONSES.get(target.constructor).get(key).set(code, toJoi(schema));
   target[Tags.tagResponse] = target.constructor[Tags.tagResponse] = RESPONSES.get(target.constructor);
 };

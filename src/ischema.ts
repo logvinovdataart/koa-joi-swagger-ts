@@ -40,7 +40,10 @@ export const toSchema = (Definition) => {
   return j2s(joi.object().keys(key)).swagger;
 };
 
-export const toJoi = (iSchema: ISchema): Schema => {
+export const toJoi = (iSchema: ISchema | joi.Schema) => {
+  if (iSchema["isJoi"]) {
+    return iSchema;
+  }
   const type = iSchema["type"] || "object";
   let schema = null;
   const Ref: any = iSchema["$ref"] || (iSchema["items"] && iSchema["items"].$ref);
