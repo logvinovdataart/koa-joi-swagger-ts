@@ -34,7 +34,7 @@ export const response = (code: number, schema?: ISchema | joi.Schema): MethodDec
   registerMiddleware(target, key, async (ctx: BaseContext, next: Function): Promise<void> => {
     await next();
     if (RESPONSES.get(target.constructor).get(key).has(ctx.status)) {
-      const registerJoiSchema = joi.build(RESPONSES.get(target.constructor).get(key).get(ctx.status));
+      const registerJoiSchema = toJoi(RESPONSES.get(target.constructor).get(key).get(ctx.status));
       const {error, value} = registerJoiSchema.validate(ctx.body);
       if (error) {
         ctx.body = {code: HTTPStatusCodes.internalServerError, message: error.message};

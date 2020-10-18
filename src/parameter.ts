@@ -1,4 +1,4 @@
-import {ISchema, toJoi, toSwagger} from "./ischema";
+import {ISchema, toSwagger} from "./ischema";
 import * as joi from "joi";
 import { registerMethod, registerMiddleware } from "./utils";
 import {HTTPStatusCodes, IPath, Tags} from "./index";
@@ -75,11 +75,6 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
       formData = body;
       body = {};
     }
-    // Object.keys(tempSchema).forEach((key) => {
-    //   if (!tempSchema[key]['isJoi']) {
-    //     tempSchema[key] = joi.object(tempSchema[key])
-    //   }
-    // });
     const {error, value} = joi.object(tempSchema).validate({
       body,
       formData,
@@ -87,10 +82,7 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
       query: ctx.request.query
     });
     if (error) {
-      return ctx.throw(HTTPStatusCodes.badRequest, JSON.stringify({
-        code: HTTPStatusCodes.badRequest,
-        message: error.message
-      }));
+      return ctx.throw(HTTPStatusCodes.badRequest, "Validation_Error", error);
     }
     ctx.params = value.params;
     ctx.request.body = ctx.request.is([
@@ -100,6 +92,6 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
     return await next();
   });
 
-  PARAMETERS.get(target.constructor).get(key).set(name, {in: paramIn, schema: toJoi(schema)});
+  PARAMETERS.get(target.constructor).get(key).set(name, {in: paramIn, schema});
   target[Tags.tagParameter] = target.constructor[Tags.tagParameter] = PARAMETERS.get(target.constructor);
 };
