@@ -75,7 +75,12 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
       formData = body;
       body = {};
     }
-    const {error, value} = joi.build(tempSchema).validate({
+    // Object.keys(tempSchema).forEach((key) => {
+    //   if (!tempSchema[key]['isJoi']) {
+    //     tempSchema[key] = joi.object(tempSchema[key])
+    //   }
+    // });
+    const {error, value} = joi.object(tempSchema).validate({
       body,
       formData,
       params: ctx.params,
