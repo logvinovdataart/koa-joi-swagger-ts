@@ -1,4 +1,4 @@
-import {ISchema, toSwagger} from "./ischema";
+import {ISchema, toJoi, toSwagger} from "./ischema";
 import * as joi from "joi";
 import { registerMethod, registerMiddleware } from "./utils";
 import {HTTPStatusCodes, IPath, Tags} from "./index";
@@ -92,6 +92,6 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
     return await next();
   });
 
-  PARAMETERS.get(target.constructor).get(key).set(name, {in: paramIn, schema});
+  PARAMETERS.get(target.constructor).get(key).set(name, {in: paramIn, schema: toJoi(schema)});
   target[Tags.tagParameter] = target.constructor[Tags.tagParameter] = PARAMETERS.get(target.constructor);
 };

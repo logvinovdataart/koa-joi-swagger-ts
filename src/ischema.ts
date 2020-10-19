@@ -12,7 +12,7 @@ export interface ISchema {
 }
 
 export const toSwagger = (iSchema: ISchema | joi.Schema): any => {
-  if (iSchema.type !== "file") {
+  if (joi.isSchema(iSchema)) {
     return j2s(iSchema as ObjectSchema).swagger;
   }
   let items;
@@ -41,7 +41,7 @@ export const toSchema = (Definition) => {
 };
 
 export const toJoi = (iSchema: ISchema | joi.Schema) => {
-  if (iSchema.type !== "file") {
+  if (joi.isSchema(iSchema)) {
     return iSchema;
   }
   const type = iSchema["type"] || "object";
@@ -65,7 +65,6 @@ export const toJoi = (iSchema: ISchema | joi.Schema) => {
   switch (type) {
     case "object":
       return schema ? schema.keys(keys) : null;
-      // @ts-ignore
     case "array":
       return schema ? schema.items(keys) : null;
     case "file":
