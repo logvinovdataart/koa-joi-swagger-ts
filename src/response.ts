@@ -4,11 +4,15 @@ import { registerMethod, registerMiddleware } from "./utils";
 import {HTTPStatusCodes, IPath, Tags} from "./index";
 import { BaseContext } from "koa";
 
+export interface IResponseOptions {
+  devMode?: boolean;
+}
+
 const RESPONSES: Map<Function, Map<string, Map<number, ISchema | joi.Schema>>> = new Map();
 
 export const DEFAULT_RESPONSE: joi.Schema = joi.string().default("");
 
-export const response = (code: number, schema?: ISchema | joi.Schema): MethodDecorator => (target: {}, key: string): void => {
+export const response = (code: number, schema?: ISchema | joi.Schema, options: IResponseOptions = {}): MethodDecorator => (target: {}, key: string): void => {
   if (!schema) {
     schema = DEFAULT_RESPONSE;
   }
@@ -33,7 +37,7 @@ export const response = (code: number, schema?: ISchema | joi.Schema): MethodDec
 
   registerMiddleware(target, key, async (ctx: BaseContext, next: Function): Promise<void> => {
     await next();
-    if (RESPONSES.get(target.constructor).get(key).has(ctx.status)) {
+    if (options.devMode && RESPONSES.get(target.constructor).get(key).has(ctx.status)) {
       const registerJoiSchema = toJoi(RESPONSES.get(target.constructor).get(key).get(ctx.status));
       const {error, value} = registerJoiSchema.validate(ctx.body);
       if (error) {
