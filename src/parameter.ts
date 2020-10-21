@@ -8,7 +8,7 @@ const PARAMETERS: Map<Function, Map<string, Map<string, IParameter>>> = new Map(
 
 export interface IParameter {
   in: ENUM_PARAM_IN;
-  schema: ISchema | joi.Schema
+  schema: ISchema | joi.Schema;
 }
 
 export enum ENUM_PARAM_IN {
@@ -79,7 +79,7 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
       body,
       formData,
       params: ctx.params,
-      query: ctx.request.query
+      query: ctx.parsedQuery || ctx.request.query
     });
     if (error) {
       return ctx.throw(HTTPStatusCodes.badRequest, "Validation_Error", error);
@@ -89,6 +89,7 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
       "multipart/form-data"
     ]) && value.formData || value.body;
     ctx.request.query = value.query;
+    ctx.parsedQuery = value.query;
     return await next();
   });
 
