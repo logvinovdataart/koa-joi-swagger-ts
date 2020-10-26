@@ -100,7 +100,7 @@ export const parameter = (schema: ISchema, paramIn?: ENUM_PARAM_IN): MethodDecor
   });
 
   const RefSchema: any = schema["$ref"];
-  const refSchema = schema["$ref"] ? new RefSchema() : {body: schema};
+  const refSchema = schema["$ref"] && paramIn === ENUM_PARAM_IN.body ? { body: schema } : new RefSchema();
 
   Object.keys(refSchema).forEach((field) => {
     PARAMETERS.get(target.constructor).get(key).set(field, {in: paramIn, schema: toJoi(refSchema[field])});
