@@ -2,11 +2,18 @@ import {controller, del, get, post, put, ENUM_PARAM_IN, parameter, response, des
 import * as joi from "joi";
 import {UserSchema} from "./user.schema";
 import {BaseController} from "./base.controller";
+import {UserBodyRequestSchema} from "./user-create.schema";
+import {UserDeleteRequestSchema} from "./user-delete.schema";
+import {UserUpdateRequestSchema} from "./user-update-schema";
+
+class UserNameQueryParam {
+    public userName = joi.string().description("username");
+}
 
 @controller("/user")
 export class UserController extends BaseController {
     @get("/")
-    @parameter("userName", joi.string().description("username"))
+    @parameter({$ref: UserNameQueryParam})
     @response(HTTPStatusCodes.success, {$ref: UserSchema})
     @response(HTTPStatusCodes.created)
     @tag("User")
@@ -15,7 +22,7 @@ export class UserController extends BaseController {
     }
 
     @post("/")
-    @parameter("user", joi.string().description("user"), ENUM_PARAM_IN.body)
+    @parameter({$ref: UserBodyRequestSchema})
     @summary("UserController[doPost]")
     @response(HTTPStatusCodes.other)
     public doPost(): void {
@@ -23,14 +30,14 @@ export class UserController extends BaseController {
     }
 
     @del("/{uid}")
-    @parameter("uid", joi.string().required().description("userID"), ENUM_PARAM_IN.path)
+    @parameter({$ref: UserDeleteRequestSchema})
     @description("Delete User")
     public doDelete(): void {
 
     }
 
     @put("/")
-    @parameter("token", joi.string().description("token"), ENUM_PARAM_IN.header)
+    @parameter({$ref: UserUpdateRequestSchema}, ENUM_PARAM_IN.header)
     public doPut(): void {
 
     }

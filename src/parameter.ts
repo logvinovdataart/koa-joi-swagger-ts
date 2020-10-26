@@ -19,7 +19,7 @@ export enum ENUM_PARAM_IN {
   formData
 }
 
-export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?: ENUM_PARAM_IN): MethodDecorator => (target: {}, key: string): void => {
+export const parameter = (schema: ISchema, paramIn?: ENUM_PARAM_IN): MethodDecorator => (target: {}, key: string): void => {
   if (!paramIn) {
     paramIn = ENUM_PARAM_IN.query;
   }
@@ -39,11 +39,18 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
       description = schema["description"];
       delete schema["description"];
     }
-    router.parameters.push(Object.assign({
-      description,
-      in: ENUM_PARAM_IN[paramIn],
-      name
-    }, {required: paramIn === ENUM_PARAM_IN.path && true}, ENUM_PARAM_IN.body === paramIn ? {schema} : schema));
+
+    const bodyParam: boolean = paramIn === ENUM_PARAM_IN.body;
+    const joiSchema = !bodyParam ? toJoi(schema) : schema;
+    const { properties = {body: schema} } = toSwagger(joiSchema);
+
+    Object.keys(properties).forEach((field) => {
+      router.parameters.push(Object.assign({
+        description,
+        in: ENUM_PARAM_IN[paramIn],
+        name: field
+      }, {required: paramIn === ENUM_PARAM_IN.path && true}, bodyParam ? {schema} : properties[field]));
+    });
   });
 
   registerMiddleware(target, key, async (ctx: BaseContext, next: Function) => {
@@ -92,6 +99,11 @@ export const parameter = (name: string, schema?: ISchema | joi.Schema, paramIn?:
     return await next();
   });
 
-  PARAMETERS.get(target.constructor).get(key).set(name, {in: paramIn, schema: toJoi(schema)});
+  const RefSchema: any = schema["$ref"];
+  const refSchema = schema["$ref"] ? new RefSchema() : {body: schema};
+
+  Object.keys(refSchema).forEach((field) => {
+    PARAMETERS.get(target.constructor).get(key).set(field, {in: paramIn, schema: toJoi(refSchema[field])});
+  });
   target[Tags.tagParameter] = target.constructor[Tags.tagParameter] = PARAMETERS.get(target.constructor);
 };
