@@ -40,7 +40,9 @@ export function before(...fn: MiddlewareFunction[]) {
     descriptor.value = async function MethodsList() {
 
       // call step by step all function from list
-      for await (const F of fn) { F.apply(this, arguments); }
+      for (const F of fn) {
+        await F.apply(this, arguments);
+      }
 
       // if all functions end - call original method
       await originalMethod.apply(this, arguments);
