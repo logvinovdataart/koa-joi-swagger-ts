@@ -12,7 +12,7 @@ export interface ISchema {
   type?: string;
   required?: boolean;
   items?: ISchema;
-  $ref?: IJoiRef;
+  $ref?: Function;
 }
 
 export const toSwagger = (iSchema: ISchema | joi.Schema): any => {
