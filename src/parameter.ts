@@ -55,7 +55,7 @@ export const parameter = (schema: ISchema, paramIn?: ENUM_PARAM_IN): MethodDecor
 
   registerMiddleware(target, key, async (ctx: BaseContext, next: Function) => {
     const schemas = PARAMETERS.get(target.constructor).get(key);
-    const tempSchema = {params: {}, body: {}, query: {}, formData: {}};
+    const tempSchema = {params: {}, body: {}, query: {}, formData: {}, headers: {}};
     let body = ctx.request.body;
     for (const [schemaName, schemaObject] of schemas) {
       switch (schemaObject.in) {
@@ -67,6 +67,9 @@ export const parameter = (schema: ISchema, paramIn?: ENUM_PARAM_IN): MethodDecor
           break;
         case ENUM_PARAM_IN.body:
           tempSchema.body = schemaObject.schema;
+          break;
+        case ENUM_PARAM_IN.header:
+          tempSchema.headers[schemaName] = schemaObject.schema;
           break;
         case ENUM_PARAM_IN.formData:
           tempSchema.formData[schemaName] = schemaObject.schema;
@@ -86,7 +89,8 @@ export const parameter = (schema: ISchema, paramIn?: ENUM_PARAM_IN): MethodDecor
       body,
       formData,
       params: ctx.params,
-      query: ctx.request.query
+      query: ctx.request.query,
+      headers: ctx.request.headers
     });
     if (error) {
       return ctx.throw(HTTPStatusCodes.badRequest, "Validation_Error", error);
