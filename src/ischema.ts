@@ -1,14 +1,18 @@
 import * as joi from "joi";
 
 import j2s from "joi-to-swagger";
-import {ObjectSchema} from "joi";
+import {ObjectSchema, ValidationOptions} from "joi";
 import {Tags} from "./index";
+
+export interface IJoiRef extends Function {
+  validationOptions?: () => ValidationOptions;
+}
 
 export interface ISchema {
   type?: string;
   required?: boolean;
   items?: ISchema;
-  $ref?: Function;
+  $ref?: IJoiRef;
 }
 
 export const toSwagger = (iSchema: ISchema | joi.Schema): any => {
